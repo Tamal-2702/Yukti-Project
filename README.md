@@ -132,4 +132,6 @@ npm install
 
 ---
 
-<div align="center"> <b>Made with ❤️ for a Cleaner India 🇮🇳</b> </div>
+<div align="center"> <b>SELECT. SORT. SOLVE</b> </div>
+<div align="center"> <b>Made with ❤️ for a Cleaner India</b> </div>
+
