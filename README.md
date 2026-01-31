@@ -18,6 +18,19 @@
 
 ---
 
+# 🔗 Live Demos & Links
+
+| Platform | Link / Action | Status |
+| :--- | :--- | :--- |
+| **🌐 Live Website** | [**Click Here to View UI**](https://idalia-semimountainously-messiah.ngrok-free.dev) | 🟢 Live (Temporary) |
+| **🤖 WhatsApp Bot** | [**Click to Chat**](https://wa.me/14155238886?text=join%20<YOUR_CODE>) | 🟡 Requires Setup |
+
+> **⚠️ Note :**
+> 1. **Website:** The Live Link runs via a secure tunnel (Ngrok). If it doesn't load, the local server might be offline. Please check the **Video Demo** below.
+> 2. **WhatsApp Bot:** To activate, please click the link and send the pre-filled message **"join <your-code>"** first. Then type **"Hi"** to start the AI.
+
+---
+
 ## 🚀 Problem Statement
 - **Segregation at Source:** Residents often fail to segregate high-value waste (E-waste, Metal).
 - **Literacy Gap:** Informal waste collectors (Ragpickers) cannot navigate complex text-based apps.
