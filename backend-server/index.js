@@ -4,7 +4,10 @@ const cors = require('cors');
 const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // Render uses process.env.PORT
+
+// --- LIVE LINK CONFIGURATION ---
+const LIVE_VERCEL_LINK = "https://yukti-project.vercel.app/";
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -12,8 +15,6 @@ app.use(express.urlencoded({ extended: true }));
 
 let wasteRequests = [];
 let userSessions = {}; 
-
-// --- ROUTES ---
 
 app.get('/', (req, res) => res.send('YUKTI Backend Running & Bot Active! 🤖'));
 
@@ -32,7 +33,7 @@ app.post('/api/requests', (req, res) => {
   res.json({ success: true, request: newRequest });
 });
 
-// 2. API: WhatsApp Bot (Smart Correction Feature Added) 🧠
+// 2. API: WhatsApp Bot (Uses Live Link)
 app.post('/api/whatsapp', async (req, res) => {
   try {
     const incomingMsg = req.body.Body ? req.body.Body.trim() : '';
@@ -40,16 +41,12 @@ app.post('/api/whatsapp', async (req, res) => {
     const numMedia = parseInt(req.body.NumMedia || '0'); 
     const mediaUrl = req.body.MediaUrl0;
 
-    console.log(`📩 Msg from ${from} | Text: "${incomingMsg}" | Photos: ${numMedia}`);
+    console.log(`📩 Msg from ${from} | Photos: ${numMedia}`);
 
     let responseMessage = "";
-
-    if (!userSessions[from]) {
-      userSessions[from] = { step: 'START', data: {} };
-    }
+    if (!userSessions[from]) { userSessions[from] = { step: 'START', data: {} }; }
     const session = userSessions[from];
 
-    // --- STATE MACHINE ---
     switch (session.step) {
       case 'START':
         responseMessage = "👋 Welcome to *YUKTI*! ♻️\n\nLet's clear your waste.\nPlease enter your *Flat Number* (e.g., A-302):";
@@ -68,29 +65,22 @@ app.post('/api/whatsapp', async (req, res) => {
 
       case 'AI_ANALYSIS':
         if (numMedia > 0) {
-          // Photo Received
-          console.log("📸 Image Detected:", mediaUrl);
           session.data.imageUrl = mediaUrl;
-          
-          // 🤖 SMART AI RESPONSE (User ko Control diya)
           responseMessage = "🤖 *AI Analysis Complete...*\n\nI detected: *Mixed Waste*.\n\n👉 If correct, type *'Yes'*.\n👉 If wrong, please *type the correct category* manually (e.g., Plastic, Cardboard).";
-          session.step = 'CONFIRM_OR_EDIT'; // Step ka naam badal diya
+          session.step = 'CONFIRM_OR_EDIT';
         } else {
           responseMessage = "⚠️ No photo detected. Please tap the 📎 icon and upload an image.";
         }
         break;
 
       case 'CONFIRM_OR_EDIT':
-        // Yahan Magic Hoga: User input check karo
         let finalCategory = "";
-        
         if (incomingMsg.toLowerCase() === 'yes') {
-            finalCategory = "Mixed Waste (AI Verified)"; // AI ki baat maan li
+            finalCategory = "Mixed Waste (AI Verified)";
         } else {
-            finalCategory = incomingMsg + " (User Corrected)"; // User ne khud bataya
+            finalCategory = incomingMsg + " (User Corrected)";
         }
 
-        // Request Save Karo
         const newRequest = {
           id: Date.now(),
           flatNumber: session.data.flatNumber,
@@ -105,9 +95,9 @@ app.post('/api/whatsapp', async (req, res) => {
         };
         
         wasteRequests.push(newRequest);
-        console.log("✅ Request Saved:", newRequest);
 
-        responseMessage = `🎉 *Pickup Scheduled!*\n\n📦 Category: *${finalCategory}*\n🆔 Track ID: YUK-${Math.floor(1000 + Math.random() * 9000)}\n\n🔔 You will get a notification when a collector accepts.`;
+        // Include LIVE VERCEL LINK in the success message
+        responseMessage = `🎉 *Pickup Scheduled!*\n\n📦 Category: *${finalCategory}*\n🆔 Track ID: YUK-${Math.floor(1000 + Math.random() * 9000)}\n\n👇 Check Status:\n${LIVE_VERCEL_LINK}`;
         delete userSessions[from]; 
         break;
 
@@ -147,11 +137,10 @@ app.post('/api/accept', (req, res) => {
         to: request.phone 
       }).then(m => console.log("User Notified")).catch(e => console.error(e));
     }
-
     res.json({ success: true, request });
   } else {
     res.status(404).json({ success: false });
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
