@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
-import { Footer } from './components/Footer'; // Ensure Footer exists or remove import
 import { RequestForm } from './components/RequestForm';
 import { StatusBoard } from './components/StatusBoard';
 import { CollectorDashboard } from './components/CollectorDashboard';
@@ -9,12 +8,15 @@ import { ShieldCheck, Truck } from 'lucide-react';
 function App() {
   const [user, setUser] = useState(null);
   const [pickups, setPickups] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false); // DARK MODE STATE
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Backend se data laana
+  // --- UPDATED: LIVE BACKEND URL ---
+  const BACKEND_URL = "https://yukti-backend-31h2.onrender.com"; 
+
   const fetchLatestData = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/requests');
+      // Ab hum Live Backend ko call kar rahe hain
+      const res = await fetch(`${BACKEND_URL}/api/requests`);
       const data = await res.json();
       setPickups(data.reverse());
     } catch (error) { console.error("API Error", error); }
@@ -28,12 +30,10 @@ function App() {
     }
   }, [user]);
 
-  // LOGIN SCREEN (Theme Supported)
+  // LOGIN SCREEN
   if (!user) {
     return (
       <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-green-50'}`}>
-        
-        {/* Toggle Button for Login Screen */}
         <button onClick={() => setIsDarkMode(!isDarkMode)} className="absolute top-5 right-5 p-2 rounded-full bg-opacity-20 bg-gray-500 text-white">
           {isDarkMode ? "☀️" : "🌙"}
         </button>
@@ -61,10 +61,8 @@ function App() {
   // MAIN APP
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      
       <Header isDarkMode={isDarkMode} toggleTheme={() => setIsDarkMode(!isDarkMode)} userRole={user} />
       
-      {/* Role Indicator / Logout */}
       <div className={`border-b px-8 py-2 flex justify-between items-center ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
         <span className="text-sm font-bold flex items-center gap-2">
           {user === 'guard' ? <ShieldCheck size={16} className="text-green-600"/> : <Truck size={16} className="text-blue-600"/>}
@@ -76,9 +74,9 @@ function App() {
       <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full">
         {user === 'guard' ? (
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Note: Cards ke andar ka dark mode basic CSS filter se handle karenge simple rakhne ke liye */}
             <div className={isDarkMode ? "invert hue-rotate-180" : ""}>
-               <RequestForm onSubmit={fetchLatestData} />
+               {/* Pass onSubmit to refresh data after submission */}
+               <RequestForm onSubmit={fetchLatestData} backendUrl={BACKEND_URL} />
             </div>
             <div className={isDarkMode ? "invert hue-rotate-180" : ""}>
                <StatusBoard pickups={pickups} />
@@ -86,12 +84,11 @@ function App() {
           </div>
         ) : (
           <div className={isDarkMode ? "invert-[.95] hue-rotate-180" : ""}>
-             <CollectorDashboard />
+             <CollectorDashboard backendUrl={BACKEND_URL} />
           </div>
         )}
       </main>
       
-      {/* Footer (Optional) */}
       <footer className={`py-4 text-center text-xs ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`}>
         YUKTI © 2026
       </footer>
